@@ -24,13 +24,13 @@ def get_data():
     end_date=datetime.strptime(data[2],'%Y%m%d')
     for day_number in range((end_date - start_date).days+1):
         date=(start_date+timedelta(days=day_number))
-        if date.weekday()<6:
+        if date.weekday()<5:
             dates.append(date.strftime('%Y%m%d'))
     return data[0],dates
 
 #爬蟲程式，用來抓取一組日期的股市資料
 def craw_data(date,symbol):
-    r=requests.get(f'https://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date={date}&type=ALLBUT0999',verify=False)
+    r=requests.get(f'https://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date={date}&type=ALL',verify=False)
     r_text=[i for i in r.text.split('\n') if len(i.split('",'))==17 and i[0] != '=']
     df=pd.read_csv(StringIO("\n".join(r_text)),header=0)
     df=df.drop(columns=['Unnamed: 16'])
