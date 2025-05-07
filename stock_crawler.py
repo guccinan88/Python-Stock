@@ -2,8 +2,10 @@ import crawler_module as m
 from time import sleep
 import pandas as pd
 import matplotlib.pyplot as plt
+import talib
+import mpl_finance as mpf
 all_list=[] #存取所有日期的股市資料
-stock_symbol,dates=m.get_data()
+stock_symbol,dates,start_date,end_date=m.get_data()
 for date in dates:
     sleep(1) #爬取一筆暫停1秒
     try:
@@ -17,18 +19,25 @@ all_df=pd.DataFrame(all_list,columns=df_columns)
 
 #準備資料
 day=all_df['日期'].astype(str)
-# price_as_float=all_df['收盤價'].replace(',','')
-price=all_df['收盤價'].astype(str)
-
+close_price=all_df['收盤價'].astype(float)
+open_price=all_df['開盤價'].astype(float)
+high_price=all_df['最高價'].astype(float)
+low_price=all_df['最低價'].astype(float)
+volume=all_df['成交股數'].str.replace(',','').astype(float)
 #建立plot物件
-plt.figure(figsize=(20,10),dpi=100)#建立新圖形
+fig,(ax,ax2)=plt.subplots(2,1,sharex=True,figsize=(24,15),dpi=100)
+ax.set_title(f'{stock_symbol} K線圖({start_date}~{end_date})')
 
-#進行繪圖
-plt.plot(day,price,'s-',color='r',label='Close Price')#在設定好的圖形上進行繪圖
-plt.title("TSMC Line Chart")#設定圖形標題
-plt.xticks(fontsize=10,rotation=45)#設定X軸刻度標籤
-plt.yticks(fontsize=10)#設定Y軸刻度標籤
-plt.legend(loc="best",fontsize=20)#設定圖例
-
+#第一個子圖(K線圖)
+mpf.candlestick2_ochl(ax,open_price,close_price,high_price,low_price,width=0.5,colorup='r',colordown='g',alpha=0.6)#繪製蠟燭圖
+ax.plot(talib.SMA(close_price,10),label='10日均線')
+ax.plot(talib.SMA(close_price,30),label='30日均線')
+ax.legend(loc='best',fontsize=20)
+ax.grid(True)
+#第二個子圖(量能圖)
+mpf.volume_overlay(ax2,open_price,close_price,volume,colorup='r',colordown='g',width=0.5,alpha=0.8)#繪製量能圖
+ax2.set_xticks(range(0,len(day),5))
+ax2.set_xticklabels(day[::5])
+ax2.grid(True)
 #顯示繪圖
 plt.show()

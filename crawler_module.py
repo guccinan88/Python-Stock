@@ -26,7 +26,7 @@ def get_data():
         date=(start_date+timedelta(days=day_number))
         if date.weekday()<5:
             dates.append(date.strftime('%Y%m%d'))
-    return data[0],dates
+    return data[0],dates,start_date,end_date
 
 #爬蟲程式，用來抓取一組日期的股市資料
 def craw_data(date,symbol):
